@@ -5,3 +5,11 @@ To use any of these mods, follow the following instructions:
 4. Note that existing saves may be incompatible with mods, so I recommend making a copy of the user saves (found in C:\\ProgramData\Popcap Games), and to play games on new saves.
 
 I will at some point upload the tools I have made to write these mods.
+
+Current mods:
+1. BA1_BigWordList.pak - Regular BA1 but with @rtrb's wordlist
+2. BA1_main_game.pak - Regular BA1
+3. BA1MisunderstandingRack.pak - BA1 but every rack is identical and can be rearranged to spell MISUNDERSTANDING
+4. BA1RescaledHealth_xKyleDict.pak - BA1 with enemy healths modified up for Books 2, 3, and with @xKyle's Word Bomb dictionary
+5. BA1RescaledHealth.pak - BA1 with enemy healths modified up for Books 2, 3
+6. BA1ResistantEnemies.pak - BA1 with modified enemy logic for Book 2, 3 to make them more resistant to damage
