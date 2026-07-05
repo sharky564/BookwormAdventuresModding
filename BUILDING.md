@@ -22,18 +22,18 @@ bwa-mod-client/
 The engine calls `bwakit` in-process (no Python subprocess is spawned), so it freezes
 cleanly. Just build from inside this folder.
 
-## 2. Get a luac (only for two mods)
+## 2. Get a luac (only for code-inject mods)
 
-Only two mods compile a *new* Lua method and so need the game's flavor of `luac`:
-`enemy_resistance` and `misunderstanding_rack` (**Lua 5.1.5 built with `LFIELDS_PER_FLUSH = 32`**).
-Every other mod - the dictionary, HP scaling, randomizer, and the unlock/skip/dialog mods -
-edits bytecode directly (or swaps a data file) and needs **no** `luac`.
+The code-inject mods (`enemy_resistance`, `misunderstanding_rack`, `skip_intro_tutorial`)
+compile a small Lua method, which needs the game's flavor of `luac`: **Lua 5.1.5 built
+with `LFIELDS_PER_FLUSH = 32`**. The file-replace (`dictionary_swap`) and builder
+(`enemy_hp_scaling`, `randomizer`) mods do **not** need it.
 
 `tools/build_luac.sh <lua-5.1.5 source dir or zip>` builds it on Unix (it patches
 `src/lopcodes.h` and compiles); on Windows do the same edit and build with your C
 toolchain. Drop the resulting `luac.exe` in this folder. The app finds a bundled
 `luac.exe`/`luac` automatically (it also honours a `BWA_LUAC` env var, then `PATH`).
-Without it, those two mods fail with a clear "luac not found" message and
+Without it, the three code-inject mods fail with a clear "luac not found" message and
 everything else still builds.
 
 ## 3. Build
@@ -60,8 +60,8 @@ protected your PC") and may alarm antivirus - expected for any unsigned hobby bu
 a sign of malware. Ship a short note with the download:
 
 > This is an unsigned community tool. Windows may warn you because it isn't code-signed
-> (signing certificates cost money). The full source is at &lt;repo link&gt; - read it or
-> build it yourself with BUILDING.md. Click **More info → Run anyway** to launch.
+> (signing certificates cost money). The full source is at https://github.com/sharky564/BookwormAdventuresModding
+> - read it or build it yourself with BUILDING.md. Click **More info → Run anyway** to launch.
 
 Code-signing with an OV/EV certificate removes the warning but isn't free; for a hobby
 mod tool the note above is the usual approach.

@@ -131,7 +131,7 @@ files plus the recipes/assets.
 ## Using it - CLI
 
 ```
-bwa-mod init  --game "C:\...\Bookworm Adventures Deluxe"
+bwa-mod init  --game "C:\\...\Bookworm Adventures Deluxe"
         # duplicates the install to a sibling "... Modded" folder, backs up + hashes
         # the pristine main.pak as the build template, caches the unpacked originals,
         # and renames the copy's executable. (Pass --originals DIR to reuse an already
