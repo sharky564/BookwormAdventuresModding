@@ -30,7 +30,7 @@ def _read_table(path):
     raw = open(path, "rb").read()
     data = P.dexor(raw)
     if struct.unpack_from("<I", data, 0)[0] != P.MAGIC:
-        raise SystemExit(
+        raise ValueError(
             "Bad magic; not a PopCap pak (or already modified incorrectly)."
         )
     version = struct.unpack_from("<I", data, 4)[0]
@@ -42,7 +42,7 @@ def _read_table(path):
         if flag == 0x80:
             break
         if flag != 0x00:
-            raise SystemExit(f"unexpected flag 0x{flag:02X} at {off - 1}")
+            raise ValueError(f"unexpected flag 0x{flag:02X} at {off - 1}")
         namelen = data[off]
         off += 1
         name = data[off : off + namelen]
@@ -58,7 +58,7 @@ def _read_table(path):
         e["orig_payload"] = data[p : p + e["size"]]
         p += e["size"]
     if p != len(data):
-        raise SystemExit(f"payload length mismatch: consumed {p}, file is {len(data)}")
+        raise ValueError(f"payload length mismatch: consumed {p}, file is {len(data)}")
     return version, entries
 
 
@@ -73,7 +73,7 @@ def build_pak(version, entries):
         name = e["name"]
         payload = e["payload"]
         if len(name) > 255:
-            raise SystemExit(f"name too long ({len(name)}B): {name!r}")
+            raise ValueError(f"name too long ({len(name)}B): {name!r}")
         table += bytes((0x00, len(name))) + name
         table += struct.pack("<I", len(payload))
         table += e["filetime"]

@@ -43,7 +43,7 @@ def parse(path: str):
     raw = open(path, "rb").read()
     data = dexor(raw)
     if struct.unpack_from("<I", data, 0)[0] != MAGIC:
-        raise SystemExit(
+        raise ValueError(
             f"Bad magic: got 0x{struct.unpack_from('<I', data, 0)[0]:08X}, "
             f"expected 0x{MAGIC:08X}. Format may differ; inspect header."
         )
