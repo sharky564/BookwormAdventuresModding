@@ -95,7 +95,7 @@ it loads cleanly. There's a tiny sample at [`examples/custom-words.txt`](example
 Everything the GUI does is on the CLI too (run from the repo root):
 
 ```
-python -m modkit.client init  --game "C:PathToBookworm Adventures Deluxe"
+python -m modkit.client init  --game "C:\\PathToBookworm Adventures Deluxe"
 python -m modkit.client mods
 python -m modkit.client build randomizer dictionary_swap --set randomizer.level=7 --set randomizer.seed=42
 python -m modkit.client build dictionary_swap --set dictionary_swap.wordlist=/path/to/mywords.txt
