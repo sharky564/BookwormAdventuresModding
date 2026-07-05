@@ -4,9 +4,14 @@ A fan-made tool for modding **Bookworm Adventures Deluxe** (BA1) and **Bookworm
 Adventures Volume 2** (BA2). It builds a modded copy of the game **from your own
 installed files** - pick some mods in a browser window, click **Build**, and play.
 
-> ⚠️ \\\*\\\*This project ships no game code, scripts, art, or the game's own dictionary.\\\*\\\*
-> You need your own copy of the game installed. \\\*Bookworm Adventures\\\*
+> ⚠️ **This project ships no game code, scripts, art, or the game's own dictionary.**
+> You need your own copy of the game installed. *Bookworm Adventures*
 > is © PopCap Games / Electronic Arts; this tool is unofficial and unaffiliated.
+
+> This project has been made with extensive use of AI, but the main work has been done
+> by me, AI was used more to set up various frameworks and GUIs that I have less
+> experience with. AI read over a lot of my work and refactored it to make it less
+> buggy, which has been a huge problem with this project.
 
 ## Play in one download (no Python)
 
@@ -30,14 +35,14 @@ only the Python standard library.
 2. **Get the code** and open a terminal in the folder:
 
 ```
-   git clone <your-repo-url>
-   cd bwa-mod-builder
+   git clone https://github.com/sharky564/BookwormAdventuresModding.git
+   cd BookwormAdventuresModding
    ```
 
 3. **Run it:**
 
 ```
-   python bwa\\\_mod\\\_gui.py          # or:  ./run.sh   (Windows:  run.bat)
+   python bwa\_mod\_gui.py          # or:  ./run.sh   (Windows:  run.bat)
    ```
 
 A page opens at `http://127.0.0.1:8765`.
@@ -72,10 +77,10 @@ More BA2 coverage is in progress.
 The builder resolves compatibility for you: mods that touch different things stack
 automatically, and a genuine conflict is reported *before* it builds.
 
-> \\\*\\\*A note on `luac`:\\\*\\\* most mods (dictionary, HP scaling, randomizer, the unlock mods,
-> skip-tutorial) work with no extra setup. Two mods that inject \\\*new\\\* script code -
-> \\\*\\\*Enemy Resistance\\\*\\\* and \\\*\\\*Misunderstanding Rack\\\*\\\* - need a PopCap-compatible `luac`
-> compiler on your `PATH` (or set `BWA\\\_LUAC`). Everything else is pure byte-editing.
+> **A note on `luac`:** most mods (dictionary, HP scaling, randomizer, the unlock mods,
+> skip-tutorial) work with no extra setup. Two mods that inject *new* script code -
+> **Enemy Resistance** and **Misunderstanding Rack** - need a PopCap-compatible `luac`
+> compiler on your `PATH` (or set `BWA\_LUAC`). Everything else is pure byte-editing.
 
 ## Custom dictionaries
 
@@ -90,10 +95,10 @@ it loads cleanly. There's a tiny sample at [`examples/custom-words.txt`](example
 Everything the GUI does is on the CLI too (run from the repo root):
 
 ```
-python -m modkit.client init  --game "C:\\\\Path\\\\To\\\\Bookworm Adventures Deluxe"
+python -m modkit.client init  --game "C:PathToBookworm Adventures Deluxe"
 python -m modkit.client mods
-python -m modkit.client build randomizer dictionary\\\_swap --set randomizer.level=7 --set randomizer.seed=42
-python -m modkit.client build dictionary\\\_swap --set dictionary\\\_swap.wordlist=/path/to/mywords.txt
+python -m modkit.client build randomizer dictionary\_swap --set randomizer.level=7 --set randomizer.seed=42
+python -m modkit.client build dictionary\_swap --set dictionary\_swap.wordlist=/path/to/mywords.txt
 python -m modkit.client launch
 python -m modkit.client restore
 ```
