@@ -1,0 +1,80 @@
+{
+  "id": "randomizer",
+  "name": "Randomizer (enemies + treasures)",
+  "version": "1.1.0",
+  "games": [
+    "ba1"
+  ],
+  "description": "Reorders the enemies you fight, and optionally shuffles which treasure each boss drops, from a seed. `level` sets how far enemies travel: 1 = within each chapter, 2 = within each book, 3 = across all books. Bosses keep their slots, the Book 1 tutorial is left untouched, and the same seed always produces the same game.",
+  "author": "you",
+  "apply_order": 60,
+  "requires": [],
+  "conflicts": [],
+  "builder": "bwakit.mods.randomizer",
+  "params": {
+    "seed": "1",
+    "level": 3,
+    "enemies": true,
+    "treasures": false,
+    "keep_bosses": true,
+    "include_tutorial": false,
+    "balance_hp": 0,
+    "balance_xp": 0
+  },
+  "param_spec": [
+    {
+      "key": "seed",
+      "type": "text",
+      "label": "Seed",
+      "default": "1",
+      "help": "Any text or number. Share a seed to share the exact same game."
+    },
+    {
+      "key": "level",
+      "type": "int",
+      "label": "Shuffle amount (0-10)",
+      "default": 3,
+      "help": "0=none, 1=within chapter, 2-5=within book (2 stays near, 5=fully random within book), 6-10=across books (10=fully random everywhere). Higher=more random; lower keeps local difficulty."
+    },
+    {
+      "key": "enemies",
+      "type": "bool",
+      "label": "Randomize enemy order",
+      "default": true
+    },
+    {
+      "key": "treasures",
+      "type": "bool",
+      "label": "Randomize treasure awards",
+      "default": false
+    },
+    {
+      "key": "keep_bosses",
+      "type": "bool",
+      "label": "Keep bosses in their slots",
+      "default": true,
+      "help": "Off = also shuffle bosses (riskier)."
+    },
+    {
+      "key": "include_tutorial",
+      "type": "bool",
+      "label": "Include chapter 1.1 (tutorial)",
+      "default": false,
+      "help": "Use with enable_gems/potions/scramble + skip_intro_tutorial."
+    },
+    {
+      "key": "balance_hp",
+      "type": "int",
+      "label": "Balance moved-enemy HP (0-3)",
+      "default": 0,
+      "help": "0=off,1=gentle,2=match,3=harsh. Rescales a moved enemy's HP toward the difficulty of its new slot."
+    },
+    {
+      "key": "balance_xp",
+      "type": "int",
+      "label": "Balance moved-enemy XP (0-3)",
+      "default": 0,
+      "help": "0=off,1=gentle,2=match,3=harsh. Sets a moved enemy's XP toward what the slot normally gives, with a small buff for tougher-than-usual / nerf for easier."
+    }
+  ]
+}

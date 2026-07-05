@@ -1,0 +1,34 @@
+{
+  "id": "enable_xp",
+  "name": "XP & Leveling From The Start",
+  "version": "1.0.0",
+  "games": [
+    "ba1"
+  ],
+  "description": "Sets the AllowXPBar profile flag true as each chapter loads, so Lex's level-up bar is active from chapter 1.1. Normally it is unlocked by a scripted conversation partway through Book 1 (Tutorial.XPConvPanelDone); this turns it on immediately. Leveling awards one stat per level, cycling every three: level 1/4/7/10... = +1 heart (and a full heal), 2/5/8/11... = +12.5% attack power, 3/6/9/12... = +1 defense. Pair this with Disable Cutscene Dialog, which skips the unlock conversation.",
+  "author": "you",
+  "apply_order": 25,
+  "requires": [],
+  "conflicts": [],
+  "transforms": [
+    {
+      "file": "scripts/books/Book.luc",
+      "op": "inject_global_call",
+      "markers": [
+        "CurrentStage",
+        "SetScrambleVisible"
+      ],
+      "global": "profile",
+      "method": "Set",
+      "args": [
+        {
+          "str": "AllowXPBar"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "at_pc": 0
+    }
+  ]
+}

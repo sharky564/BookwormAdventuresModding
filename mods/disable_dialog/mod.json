@@ -1,0 +1,101 @@
+{
+  "id": "disable_dialog",
+  "name": "Disable Cutscene Dialog",
+  "version": "1.2.0",
+  "games": [
+    "ba1"
+  ],
+  "description": "Skips the conversation-panel cutscenes that play between fights, before bosses, and after victories. Works at two layers: (1) forces Book:HasPanCompleteDialog and Book:HasVictoryCompleteDialog (base class) to return false, and (2) neutralizes the per-book story handlers Book{1,2,3}:OnVictoryComplete and OnPanComplete, which call convpanel.Activate() directly (gated by NeedsStageTutorial, NOT by the base gates) and are the actual source of the early-chapter dialogs. All targeted handlers are pure dialog (verified: no treasure/state writes), so returning early is safe. NOT removed: the once-per-chapter intro tutorials in InitialTilesDone (chapter 1 'Whoa where am I', chapter 5/6 intros -- left intact because chapter 6's branch is the only thing that unlocks gems), and the inter-book CutsceneLoop story scenes and in-battle word-bubble taunts. Because this skips the conversation that normally unlocks the level-up bar, it also sets AllowXPBar from the start so leveling keeps working (same effect as the enable_xp mod).",
+  "author": "you",
+  "apply_order": 26,
+  "requires": [],
+  "conflicts": [],
+  "transforms": [
+    {
+      "file": "scripts/books/Book.luc",
+      "op": "force_return_false",
+      "markers": [
+        "mPanCompleteTutorialListing",
+        "EnemyType",
+        "NeedsStageTutorial"
+      ]
+    },
+    {
+      "file": "scripts/books/Book.luc",
+      "op": "force_return_false",
+      "markers": [
+        "mVictoryCompleteTutorialListing",
+        "EnemyType",
+        "NeedsStageTutorial"
+      ]
+    },
+    {
+      "file": "scripts/books/Book.luc",
+      "op": "inject_global_call",
+      "markers": [
+        "CurrentStage",
+        "SetScrambleVisible"
+      ],
+      "global": "profile",
+      "method": "Set",
+      "args": [
+        {
+          "str": "AllowXPBar"
+        },
+        {
+          "bool": true
+        }
+      ],
+      "at_pc": 0
+    },
+    {
+      "file": "scripts/books/Book1.luc",
+      "op": "force_return_false",
+      "markers": [
+        "Wow! Good job! It's me, Cassandra!"
+      ]
+    },
+    {
+      "file": "scripts/books/Book1.luc",
+      "op": "force_return_false",
+      "markers": [
+        "Whoah! That really heats things up! Get it? Heats things up?"
+      ]
+    },
+    {
+      "file": "scripts/books/Book2.luc",
+      "op": "force_return_false",
+      "markers": [
+        "Now, I must find the great weapon Codex spoke of, and quickity-split!"
+      ]
+    },
+    {
+      "file": "scripts/books/Book2.luc",
+      "op": "force_return_false",
+      "markers": [
+        "So woozy... What is that in the distance, a tent!?  I'm saved!"
+      ]
+    },
+    {
+      "file": "scripts/books/Book3.luc",
+      "op": "force_return_false",
+      "markers": [
+        "Please, monster, have pity on us!"
+      ]
+    },
+    {
+      "file": "scripts/books/Book3.luc",
+      "op": "force_return_false",
+      "markers": [
+        "All right! One quick squirm and I should be there!"
+      ]
+    },
+    {
+      "file": "scripts/books/Book3.luc",
+      "op": "force_return_false",
+      "markers": [
+        "Your quest is at an end, puny one. Your friends are gone."
+      ]
+    }
+  ]
+}

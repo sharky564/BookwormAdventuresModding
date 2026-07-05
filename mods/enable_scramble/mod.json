@@ -1,0 +1,64 @@
+{
+  "id": "enable_scramble",
+  "name": "Scramble From The Start",
+  "version": "1.2.0",
+  "games": [
+    "ba1"
+  ],
+  "description": "Makes the scramble button both VISIBLE (Book:LoadChapterResources) and ENABLED (BattleEngine OnPanComplete / AttackTooltipCallback / BossBattleUpdate) from chapter 1.1, by neutralizing the `chapter >= 4` gates that normally keep it greyed out until Book 1 chapter 4. Also skips the Book 1 chapter 4 scramble TUTORIAL (Tutorial.Chap4ScrambleUpdate): that scripted lesson assumes scramble is still locked and crashes the game on entering 1.4 once scramble is already enabled, so it is torn down immediately (RestoreState / RemoveOverlayCallback / IntroDialogComplete) and the chapter proceeds normally.",
+  "author": "you",
+  "apply_order": 24,
+  "requires": [],
+  "conflicts": [],
+  "transforms": [
+    {
+      "file": "scripts/books/Book.luc",
+      "op": "patch_compare_const",
+      "markers": [
+        "CurrentStage",
+        "SetScrambleVisible"
+      ],
+      "opcode": 25,
+      "operand": "B",
+      "from": 4,
+      "to": 0
+    },
+    {
+      "file": "scripts/BattleEngine.luc",
+      "op": "patch_compare_all",
+      "opcode": 25,
+      "operand": "B",
+      "from": 4,
+      "to": 0
+    },
+    {
+      "file": "scripts/Tutorial.luc",
+      "op": "inject_self_global_calls",
+      "markers": [
+        "Tutorial.Chap4ScrambleComplete",
+        "Press scramble now and try it out!"
+      ],
+      "at_pc": 0,
+      "then_return": true,
+      "calls": [
+        {
+          "global": "gBattleEngine",
+          "method": "RestoreState"
+        },
+        {
+          "global": "gBoard",
+          "method": "RemoveOverlayCallback",
+          "args": [
+            {
+              "str": "gBattleEngine:DrawOverlay"
+            }
+          ]
+        },
+        {
+          "global": "gBattleEngine",
+          "method": "IntroDialogComplete"
+        }
+      ]
+    }
+  ]
+}

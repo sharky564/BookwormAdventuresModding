@@ -1,0 +1,58 @@
+name: build
+
+# Builds the standalone one-file app on real Windows/macOS/Linux machines so end users
+# just download and run it (no Python, no PyInstaller on their side). Push a version tag
+# (e.g. `git tag v1.0.0 && git push --tags`) to build AND attach the binaries to that
+# GitHub Release. Use the "Run workflow" button (workflow_dispatch) to build without a release.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write        # allows attaching the binaries to the Release
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, asset: BookwormModBuilder-windows.exe, out: dist/BookwormModBuilder.exe }
+          - { os: macos-latest,   asset: BookwormModBuilder-macos,       out: dist/BookwormModBuilder }
+          - { os: ubuntu-latest,  asset: BookwormModBuilder-linux,       out: dist/BookwormModBuilder }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyinstaller
+
+      - name: Sanity check (imports + catalog)
+        shell: bash
+        run: python -c "import modkit.webui, bwakit; from bwakit.mods import dict_swap, randomizer, hp_scaling"
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: build.bat
+
+      - name: Build (macOS / Linux)
+        if: runner.os != 'Windows'
+        run: bash build.sh
+
+      - name: Name the artifact
+        shell: bash
+        run: cp "${{ matrix.out }}" "${{ matrix.asset }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+
+      - name: Attach to the Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.asset }}

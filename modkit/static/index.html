@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookworm Adventures - Mod Builder</title>
+<style>
+  :root{
+    --paper:#f4f1ea; --card:#fffdf8; --ink:#23282f; --muted:#6b7280; --line:#e4dfd3;
+    --accent:#4f46e5; --accent2:#0d9488; --violet:#7c3aed; --go:#16a34a; --go-d:#15803d;
+    --warn-bg:#fef3c7; --warn-bd:#f0d27a; --warn-tx:#92670b;
+    --err-bg:#fee2e2; --err-bd:#f3b4b4; --err-tx:#b42318;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .topbar{background:linear-gradient(100deg,#1f2430,#2c3350);color:#fff;padding:18px 22px;
+          display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .topbar h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
+  .topbar .sub{color:#c7cbe0;font-size:13px}
+  .topbar .install{margin-left:auto;font-size:12px;color:#c7cbe0;text-align:right;line-height:1.4}
+  .topbar .install b{color:#fff;font-weight:600}
+  .wrap{max-width:1020px;margin:22px auto;padding:0 18px}
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        box-shadow:0 1px 2px rgba(40,40,40,.04)}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);
+           margin:0;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .mods{padding:6px}
+  .mod{display:flex;gap:12px;padding:12px;border-radius:9px;cursor:pointer}
+  .mod:hover{background:#faf7ef}
+  .mod input{margin-top:3px;width:17px;height:17px;accent-color:var(--accent)}
+  .mod .name{font-weight:620}
+  .mod .desc{color:var(--muted);font-size:13.5px;margin-top:2px}
+  .mod .note{margin-top:6px;font-size:12.5px;color:var(--warn-tx);
+             background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:7px;padding:5px 8px}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;
+        vertical-align:middle;margin-left:8px;color:#fff}
+  .pill.codeinject{background:var(--accent)} .pill.filereplace{background:var(--accent2)}
+  .pill.builder{background:var(--violet)}
+  .params{margin:-2px 0 8px 40px;padding:10px 12px;background:#f3f1ea;border:1px solid var(--line);
+          border-radius:8px;display:flex;flex-direction:column;gap:7px}
+  .prow{display:flex;align-items:center;gap:8px;font-size:13px}
+  .prow input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent)}
+  .ptext{flex:0 0 140px;padding:5px 8px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .phelp{font-size:11.5px;color:var(--muted);margin-left:2px}
+  .side{position:sticky;top:18px;display:flex;flex-direction:column;gap:14px}
+  .side .body{padding:13px 16px}
+  ol.order{margin:0;padding-left:20px} ol.order li{margin:3px 0}
+  .empty{color:var(--muted);font-style:italic}
+  ul.flat{list-style:none;margin:8px 0 0;padding:0} ul.flat li{margin:5px 0;font-size:13.5px}
+  .issue{color:var(--err-tx)} .compat{color:var(--warn-tx)}
+  .actions{display:flex;flex-direction:column;gap:9px;padding:13px 16px}
+  .btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);
+       font-size:14px;font-weight:600;padding:10px 12px;border-radius:9px;cursor:pointer}
+  .btn:hover{border-color:#c9c2b2}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.build{background:var(--go);border-color:var(--go-d);color:#fff}
+  .btn.build:hover:not(:disabled){background:var(--go-d)}
+  .banner{margin:0 0 16px;padding:10px 14px;border-radius:10px;font-size:13.5px}
+  .banner.warn{background:var(--warn-bg);border:1px solid var(--warn-bd);color:var(--warn-tx)}
+  .banner.err{background:var(--err-bg);border:1px solid var(--err-bd);color:var(--err-tx)}
+  .banner.preview{background:#eef0ff;border:1px solid #c9cdf5;color:#3730a3}
+  .log{margin-top:18px}
+  .log pre{margin:0;padding:13px 16px;background:#1b1f27;color:#d7dbe2;border-radius:0 0 12px 12px;
+           font-size:12.5px;max-height:240px;overflow:auto;white-space:pre-wrap}
+  .setup .body{padding:18px 20px;max-width:640px}
+  .setup label{display:block;font-weight:600;font-size:13px;margin:14px 0 5px}
+  .setup input[type=text]{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+  .setup .hint{color:var(--muted);font-size:12.5px;margin-top:4px}
+  .setup .row{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13.5px}
+  details summary{cursor:pointer;color:var(--accent);font-size:13px;margin-top:14px}
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>Bookworm Adventures</h1><span class="sub">Mod Builder</span>
+    <div class="install" id="install"></div>
+  </div>
+  <div class="wrap" id="app"></div>
+
+<script>
+const PREVIEW_MODS = [
+  {id:"dictionary_swap",name:"Expanded Dictionary (299,768 words)",kind:"file-replace",apply_order:10,
+   requires:[],conflicts:[],compat_note:"",
+   description:"Replaces the ~167k-word dictionary with a larger 299,768-word list, so many more words are accepted."},
+  {id:"skip_intro_tutorial",name:"Skip Intro Tutorial",kind:"code-inject",apply_order:20,
+   requires:[],conflicts:[],compat_note:"",
+   description:"Marks the PLAY tutorial complete so chapter 1.1 stays playable even when a rack mod removes its tiles."},
+  {id:"enemy_resistance",name:"Enemy Resistance Scaling",kind:"code-inject",apply_order:30,
+   requires:[],conflicts:[],compat_note:"",
+   description:"Later-book enemies take progressively less damage, scaling with their global enemy index. Book 1 untouched."},
+  {id:"enemy_hp_scaling",name:"Late-Game Enemy HP Scaling",kind:"builder",apply_order:40,
+   requires:[],conflicts:[],
+   compat_note:"Stacks in effect with enemy_resistance: both harden the late game. Fine together, just harder.",
+   description:"Scales Book 2-3 enemy HP up by excess attack-power above end-of-Book-1. Sphinx (2.4) and Codex (3.10) phases included."},
+  {id:"misunderstanding_rack",name:"Misunderstanding Rack",kind:"code-inject",apply_order:50,
+   requires:[],conflicts:[],compat_note:"",
+   description:"Every rack always spells MISUNDERSTANDING, in every chapter. Pair with skip_intro_tutorial."},
+  {id:"randomizer",name:"Randomizer (enemies + treasures)",kind:"builder",apply_order:60,
+   requires:[],conflicts:[],
+   compat_note:"Rewrites the chapter rosters in packs/Book*.luc. enemy_resistance and enemy_hp_scaling stack fine.",
+   description:"Shuffles which enemies appear and which treasures are awarded, from a seed. Bosses keep their slots; same seed = same game.",
+   param_spec:[{key:"seed",type:"text",label:"Seed",default:"1",help:"Any text or number. Share a seed to share the exact same game."},
+               {key:"level",type:"int",label:"Shuffle amount (0-10)",default:3,help:"0=none, 1=within chapter, 2-5=within book (2 stays near, 5=fully random within book), 6-10=across books (10=fully random). Higher=more random; lower keeps local difficulty."},
+               {key:"enemies",type:"bool",label:"Randomize enemy order",default:true},
+               {key:"treasures",type:"bool",label:"Randomize treasure awards",default:false},
+               {key:"keep_bosses",type:"bool",label:"Keep bosses in their slots",default:true,help:"Off = also shuffle bosses (riskier)."},
+               {key:"include_tutorial",type:"bool",label:"Include chapter 1.1 (tutorial)",default:false,help:"Use with enable_gems/potions/scramble + skip_intro_tutorial."},
+               {key:"balance_hp",type:"int",label:"Balance moved-enemy HP (0-3)",default:0,help:"0=off,1=gentle,2=match,3=harsh. Rescales a moved enemy\u2019s HP toward its new slot\u2019s difficulty."},
+               {key:"balance_xp",type:"int",label:"Balance moved-enemy XP (0-3)",default:0,help:"0=off,1=gentle,2=match,3=harsh. Sets a moved enemy\u2019s XP toward what the slot normally gives, +small buff for tougher / nerf for easier."}]},
+];
+
+let MODS = [], SELECTED = new Set(), PREVIEW = false, OVERRIDES = {};
+
+async function api(path, method="GET", body){
+  const r = await fetch(path, {method, headers:{"Content-Type":"application/json"},
+                               body: body?JSON.stringify(body):undefined});
+  if(!r.ok){ let e; try{e=(await r.json()).error}catch{e=r.statusText} throw new Error(e||("HTTP "+r.status)); }
+  return r.json();
+}
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+const pillClass = k => k.replace("-","");
+
+function log(line){
+  let pre = document.querySelector("#log pre");
+  if(!pre){ const c=el("div","card log"); c.append(el("h2",null,"Log"),el("pre")); document.getElementById("app").append(c); pre=c.querySelector("pre"); }
+  pre.textContent += (pre.textContent?"\n":"") + line; pre.scrollTop = pre.scrollHeight;
+}
+
+function localPlan(ids){
+  const by = Object.fromEntries(MODS.map(m=>[m.id,m]));
+  const sel = ids.map(i=>by[i]).filter(Boolean);
+  const ss = new Set(ids), issues=[];
+  for(const m of sel){
+    (m.requires||[]).forEach(r=>{ if(!ss.has(r)) issues.push(`${m.id} requires ${r} (not selected)`); });
+    (m.conflicts||[]).forEach(c=>{ if(ss.has(c)) issues.push(`${m.id} conflicts with ${c}`); });
+  }
+  const order = [...sel].sort((a,b)=>(a.apply_order-b.apply_order)||a.id.localeCompare(b.id)).map(m=>m.id);
+  const compat = sel.filter(m=>m.compat_note).map(m=>({id:m.id,note:m.compat_note}));
+  return {order,issues,compat};
+}
+
+async function refreshPlan(){
+  const ids=[...SELECTED];
+  let plan;
+  try{ plan = PREVIEW ? localPlan(ids) : await api("/api/plan?ids="+encodeURIComponent(ids.join(","))); }
+  catch{ plan = localPlan(ids); }
+  const order=document.getElementById("order"), iss=document.getElementById("issues"), notes=document.getElementById("notes");
+  order.innerHTML = plan.order.length ? plan.order.map((id,i)=>`<li>${id}</li>`).join("")
+                                      : `<li class="empty">- select mods -</li>`;
+  iss.innerHTML = plan.issues.length ? plan.issues.map(t=>`<li class="issue">⚠ ${t}</li>`).join("")
+                                     : `<li class="empty">none</li>`;
+  notes.innerHTML = plan.compat.length ? plan.compat.map(c=>`<li class="compat">• ${c.note}</li>`).join("")
+                                       : `<li class="empty">none</li>`;
+  document.getElementById("buildBtn").disabled = (ids.length===0 || plan.issues.length>0);
+}
+
+function mainView(status){
+  const app=document.getElementById("app"); app.innerHTML="";
+  if(PREVIEW) app.append(el("div","banner preview","<b>Preview mode.</b> Start the local server with <code>python -m modkit.webui</code> to build for real."));
+  if(status && status.luac===false) app.append(el("div","banner warn","<b>luac not found.</b> Code-inject mods need it; set <code>BWA_LUAC</code> (file-replace &amp; builder mods still work)."));
+
+  const grid=el("div","grid");
+  // mods column
+  const left=el("div","card");
+  left.append(el("h2",null,"Mods"));
+  const list=el("div","mods");
+  for(const m of MODS){
+    const row=el("label","mod");
+    const cb=el("input"); cb.type="checkbox"; cb.checked=SELECTED.has(m.id);
+    const body=el("div");
+    body.append(el("div","name",`${m.name}<span class="pill ${pillClass(m.kind)}">${m.kind}</span>`));
+    body.append(el("div","desc",m.description));
+    if(m.compat_note) body.append(el("div","note",m.compat_note));
+    row.append(cb,body); list.append(row);
+    // editable params (e.g. randomizer seed/toggles): a sibling panel so its inputs
+    // never toggle the mod checkbox; shown only while the mod is selected.
+    let panel=null;
+    if(m.param_spec && m.param_spec.length){
+      OVERRIDES[m.id]=OVERRIDES[m.id]||{};
+      panel=el("div","params");
+      for(const sp of m.param_spec){
+        if(!(sp.key in OVERRIDES[m.id])) OVERRIDES[m.id][sp.key]=sp.default;
+        const prow=el("div","prow");
+        if(sp.type==="bool"){
+          const c=el("input"); c.type="checkbox"; c.checked=!!OVERRIDES[m.id][sp.key];
+          c.onchange=()=>{ OVERRIDES[m.id][sp.key]=c.checked; };
+          prow.append(c, el("span","plabel",sp.label));
+        } else {
+          prow.append(el("span","plabel",sp.label+":"));
+          const t=el("input","ptext"); t.type="text"; t.value=OVERRIDES[m.id][sp.key];
+          t.oninput=()=>{ OVERRIDES[m.id][sp.key]=t.value; };
+          prow.append(t);
+        }
+        panel.append(prow);
+        if(sp.help) panel.append(el("div","phelp",sp.help));
+      }
+      panel.style.display = cb.checked ? "" : "none";
+      list.append(panel);
+    }
+    cb.onchange=()=>{ cb.checked?SELECTED.add(m.id):SELECTED.delete(m.id);
+                      if(panel) panel.style.display=cb.checked?"":"none"; refreshPlan(); };
+  }
+  left.append(list);
+
+  // side column
+  const side=el("div","side");
+  const plan=el("div","card");
+  plan.append(el("h2",null,"Plan"));
+  plan.append(el("div","body",
+    `<div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Apply order</div>
+     <ol class="order" id="order"></ol>
+     <div style="margin-top:12px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Issues</div>
+     <ul class="flat" id="issues"></ul>
+     <div style="margin-top:12px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Notes</div>
+     <ul class="flat" id="notes"></ul>`));
+  const act=el("div","card");
+  act.append(el("h2",null,"Actions"));
+  const actions=el("div","actions");
+  const build=el("button","btn build"); build.id="buildBtn"; build.textContent="Build modded pak"; build.onclick=doBuild;
+  const launch=el("button","btn"); launch.textContent="Launch game"; launch.onclick=doLaunch;
+  const restore=el("button","btn"); restore.textContent="Restore vanilla"; restore.onclick=doRestore;
+  actions.append(build,launch,restore); act.append(actions);
+  side.append(plan,act);
+
+  grid.append(left,side); app.append(grid);
+  refreshPlan();
+}
+
+function setupView(status){
+  const app=document.getElementById("app"); app.innerHTML="";
+  if(status && status.luac===false) app.append(el("div","banner warn","<b>luac not found.</b> Set <code>BWA_LUAC</code> for code-inject mods."));
+  const card=el("div","card setup");
+  card.append(el("h2",null,"Set up"));
+  const body=el("div","body");
+  body.innerHTML=
+    `<p>Point this at your <b>Bookworm Adventures Deluxe</b> folder. It's duplicated to a sibling
+       "… Modded" folder, the original <code>main.pak</code> is backed up and hashed as the build
+       template, and the copy's game files are unpacked once. Your original install is never touched.</p>
+     <label>Game folder</label>
+     <input type="text" id="game" placeholder="C:\\Program Files (x86)\\…\\Bookworm Adventures Deluxe">
+     <div class="hint">The folder that contains <code>main.pak</code> and the game's .exe.</div>
+     <details><summary>Advanced</summary>
+       <label>Already-extracted originals (optional)</label>
+       <input type="text" id="originals" placeholder="leave blank to unpack automatically">
+       <div class="hint">If you've already extracted the pak, point here to skip the one-time unpack.</div>
+       <div class="row"><input type="checkbox" id="force"><label for="force" style="margin:0;font-weight:500">Overwrite the modded folder if it already exists</label></div>
+     </details>
+     <div style="margin-top:18px"><button class="btn build" id="setupBtn">Set up</button></div>`;
+  card.append(body); app.append(card);
+  document.getElementById("setupBtn").onclick=doInit;
+}
+
+function poll(jid, done){
+  let seen=0;
+  const t=setInterval(async ()=>{
+    let j; try{ j=await api("/api/job/"+jid); }catch(e){ clearInterval(t); log("error: "+e.message); return; }
+    (j.log||[]).slice(seen).forEach(log); seen=(j.log||[]).length;
+    if(j.state==="done"){ clearInterval(t); done(j.result); }
+    else if(j.state==="error"){ clearInterval(t); log("✗ "+j.error); enableButtons(); }
+  },400);
+}
+function enableButtons(){ document.querySelectorAll(".btn").forEach(b=>b.disabled=false); refreshPlan&&refreshPlan(); }
+
+async function doBuild(){
+  if(PREVIEW){ alert("Preview mode - run `python -m modkit.webui` to build."); return; }
+  document.querySelectorAll(".btn").forEach(b=>b.disabled=true);
+  try{ const {job}=await api("/api/build","POST",{ids:[...SELECTED], overrides:OVERRIDES});
+       poll(job, async ()=>{ log("✓ build complete"); enableButtons(); await loadStatus(); }); }
+  catch(e){ log("✗ "+e.message); enableButtons(); }
+}
+async function doLaunch(){
+  if(PREVIEW){ alert("Preview mode."); return; }
+  try{ const r=await api("/api/launch","POST",{}); log(r.launched?("launched "+r.path):("run: "+r.path)); }
+  catch(e){ log("✗ "+e.message); }
+}
+async function doRestore(){
+  if(PREVIEW){ alert("Preview mode."); return; }
+  try{ await api("/api/restore","POST",{}); log("✓ restored vanilla main.pak"); await loadStatus(); }
+  catch(e){ log("✗ "+e.message); }
+}
+async function doInit(){
+  const game=document.getElementById("game").value.trim();
+  if(!game){ alert("Enter the game folder path."); return; }
+  document.getElementById("setupBtn").disabled=true;
+  try{
+    const {job}=await api("/api/init","POST",{game,
+      originals:document.getElementById("originals").value.trim(),
+      force:document.getElementById("force").checked});
+    poll(job, ()=>{ log("✓ set up"); loadStatus(); });
+  }catch(e){ log("✗ "+e.message); document.getElementById("setupBtn").disabled=false; }
+}
+
+function renderInstall(s){
+  const i=document.getElementById("install");
+  if(s && s.configured){
+    i.innerHTML=`modded: <b>${s.modded}</b><br>template ✓ <span class="mono">${(s.template_sha256||"").slice(0,12)}…</span>`
+              + (s.installed&&s.installed.length?`  •  installed: <b>${s.installed.join(", ")}</b>`:"  •  vanilla");
+  } else if(PREVIEW){ i.textContent="preview"; } else { i.textContent=""; }
+}
+
+async function loadStatus(){
+  let s=null;
+  try{ s=await api("/api/status"); }
+  catch{ PREVIEW=true; }                       // no server (opened as a file) -> preview
+  if(!MODS.length){
+    try{ MODS=(await api("/api/mods")).mods; }
+    catch{ MODS=PREVIEW_MODS; PREVIEW=true; if(!SELECTED.size){SELECTED=new Set(["dictionary_swap","enemy_hp_scaling"]);} }
+  }
+  renderInstall(s);
+  if(PREVIEW || (s && s.configured)) mainView(s); else setupView(s);
+}
+loadStatus();
+</script>
+</body>
+</html>

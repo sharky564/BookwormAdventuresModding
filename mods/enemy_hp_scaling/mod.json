@@ -1,0 +1,27 @@
+{
+  "id": "enemy_hp_scaling",
+  "name": "Late-Game Enemy HP Scaling",
+  "version": "1.1.0",
+  "games": [
+    "ba1",
+    "ba2"
+  ],
+  "description": "Scales late-game enemy HP up by the enemy's EXCESS attack-power above the end of the first full book, so the first book stays vanilla and the late game ramps. BA1 (Books 2-3) uses the TAS-observed power table and scales the multi-phase Sphinx (2.4) and Codex (3.10) survival bosses on every phase. BA2 (Books 5-6) computes Lex's power curve from its leveling (P0 = end of Book 4); the curve is leveling-only (no treasures) so it is gentler than BA1 -- raise 'd' for more intensity.",
+  "author": "you",
+  "apply_order": 40,
+  "requires": [],
+  "conflicts": [],
+  "builder": "bwakit.mods.hp_scaling",
+  "params": {
+    "d": 0.6
+  },
+  "param_spec": [
+    {
+      "key": "d",
+      "type": "float",
+      "label": "Scaling exponent (d)",
+      "default": "0.6",
+      "help": "Higher = harsher late-game HP. Ships at 0.6; BA2's leveling-only curve is gentle, so try ~1.2 for BA1-like intensity."
+    }
+  ]
+}

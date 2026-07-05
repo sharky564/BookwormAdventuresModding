@@ -1,0 +1,35 @@
+{
+  "id": "dictionary_swap",
+  "name": "Custom / Expanded Dictionary",
+  "version": "1.1.0",
+  "games": [
+    "ba1",
+    "ba2"
+  ],
+  "description": "Replaces the game's word list. Point it at your own plain-text file (one word per line) to play with any dictionary you like, or leave it blank for the bundled ~300k-word list. Front-coded into data/compressed.txt exactly as the engine expects.",
+  "author": "you",
+  "apply_order": 10,
+  "requires": [],
+  "conflicts": [],
+  "builder": "bwakit.mods.dict_swap",
+  "params": {
+    "wordlist": "",
+    "gate": true
+  },
+  "param_spec": [
+    {
+      "key": "wordlist",
+      "type": "text",
+      "label": "Word list file (optional)",
+      "default": "",
+      "help": "Full path to a plain-text file with one word per line. Leave blank to use the bundled ~300k-word list. Words are uppercased, filtered to A-Z, and gated to 3-16 letters."
+    },
+    {
+      "key": "gate",
+      "type": "bool",
+      "label": "Apply 3-16 letter length limit",
+      "default": true,
+      "help": "The engine only accepts 3-16 letter words; longer/shorter ones are dropped. Leave on."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+# --- never commit game files (copyright) or local install state ---
+*.pak
+*.bwa
+originals/
+*.stage/
+*.stage
+# client install state / caches
+.bwa-mod/
+state.json
+*.log
+
+# --- packaging / build artifacts ---
+build/
+dist/
+*.spec
+luac
+luac.exe
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# --- editors / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

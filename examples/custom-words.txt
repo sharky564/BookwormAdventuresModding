@@ -1,0 +1,24 @@
+# Example custom word list for the "Custom / Expanded Dictionary" mod.
+# One word per line. Lines are uppercased, filtered to A-Z only, de-duplicated,
+# sorted, and length-gated to 3-16 letters before being loaded into the game.
+# (Lines that aren't plain letters are simply ignored, so comments like this are fine.)
+algorithm
+boolean
+compiler
+debugger
+function
+variable
+recursion
+pointer
+syntax
+kernel
+buffer
+runtime
+closure
+iterator
+mutex
+lambda
+heap
+stack
+cache
+thread

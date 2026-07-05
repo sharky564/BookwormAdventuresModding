@@ -1,0 +1,35 @@
+{
+  "id": "enemy_resistance",
+  "name": "Enemy Resistance Scaling",
+  "version": "1.0.0",
+  "games": [
+    "ba1"
+  ],
+  "description": "Later-book enemies take progressively less damage, scaling with their global enemy index. Book 1 is unaffected.",
+  "author": "you",
+  "apply_order": 30,
+  "requires": [],
+  "conflicts": [],
+  "transforms": [
+    {
+      "file": "scripts/creatures/CreatureBaseClass.luc",
+      "op": "append_bound_method",
+      "class": "CreatureBaseClass",
+      "method": "ApplyResistance",
+      "source": "ApplyResistance.lua"
+    },
+    {
+      "file": "scripts/creatures/CreatureBaseClass.luc",
+      "op": "inject_self_call",
+      "markers": [
+        "HandleOverkill"
+      ],
+      "method": "ApplyResistance",
+      "args": [
+        1
+      ],
+      "ret": 1,
+      "at_pc": 16
+    }
+  ]
+}

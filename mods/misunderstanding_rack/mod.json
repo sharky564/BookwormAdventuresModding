@@ -1,0 +1,51 @@
+{
+  "id": "misunderstanding_rack",
+  "name": "Misunderstanding Rack",
+  "version": "1.0.0",
+  "games": [
+    "ba1"
+  ],
+  "description": "Every rack always spells MISUNDERSTANDING, in every campaign chapter. Pair with skip_intro_tutorial so 1.1 stays playable.",
+  "author": "you",
+  "apply_order": 50,
+  "requires": [],
+  "conflicts": [],
+  "transforms": [
+    {
+      "file": "scripts/TileEngine.luc",
+      "op": "append_bound_method",
+      "class": "TileEngine",
+      "method": "NextNeeded",
+      "source": "NextNeeded.lua"
+    },
+    {
+      "file": "scripts/TileEngine.luc",
+      "op": "inject_self_call",
+      "markers": [
+        "mOldBaseAnim"
+      ],
+      "method": "NextNeeded",
+      "args": [
+        1,
+        2
+      ],
+      "ret": 2,
+      "at_pc": 0
+    },
+    {
+      "file": "scripts/TileEngine.luc",
+      "op": "inject_self_call",
+      "markers": [
+        "mPipCel",
+        "mLetterAscent"
+      ],
+      "method": "NextNeeded",
+      "args": [
+        1,
+        2
+      ],
+      "ret": 2,
+      "at_pc": 0
+    }
+  ]
+}
