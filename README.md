@@ -42,7 +42,7 @@ only the Python standard library.
 3. **Run it:**
 
 ```
-   python bwa\_mod\_gui.py          # or:  ./run.sh   (Windows:  run.bat)
+   python bwa_mod_gui.py          # or:  ./run.sh   (Windows:  run.bat)
    ```
 
 A page opens at `http://127.0.0.1:8765`.
@@ -61,14 +61,14 @@ never cumulatively, so you can't paint yourself into a corner.
 
 |Mod|What it does|BA1|BA2|
 |-|-|:-:|:-:|
-|**Custom / Expanded Dictionary**|Swap the word list - bundled \~300k words, or **point at your own `.txt`** (one word per line).|✅|✅|
+|**Custom / Expanded Dictionary**|Swap the word list - bundled ~300k words, or **point at your own `.txt`** (one word per line).|✅|✅|
 |**Late-Game Enemy HP Scaling**|Scales late-game enemy HP up by how far ahead their attack power is; `d` dials intensity.|✅|✅|
 |**Randomizer**|Shuffles which enemies you fight (and optionally each boss's treasure) from a seed. A **0–10** dial runs from within-chapter up to fully random; optional HP/XP rebalancing keeps moved enemies fair.|✅|-|
 |**Enemy Resistance Scaling**|Later enemies take progressively less damage.|✅|-|
 |**Misunderstanding Rack**|Every rack always spells MISUNDERSTANDING.|✅|-|
 |**Disable Cutscene Dialog**|Skips the story dialog.|✅|-|
 |**Skip Intro Tutorial**|Marks the intro tile tutorial done so chapter 1.1 is playable without it.|✅|-|
-|**XP \& Leveling From The Start**|Turns the level-up bar on from chapter 1.1.|✅|-|
+|**XP & Leveling From The Start**|Turns the level-up bar on from chapter 1.1.|✅|-|
 |**Gems / Potions / Scramble From The Start**|Unlock the special tile mechanics immediately.|✅|-|
 
 BA2 already unlocks gems/potions/XP/scramble by default, so those mods are BA1-only.
@@ -80,12 +80,12 @@ automatically, and a genuine conflict is reported *before* it builds.
 > **A note on `luac`:** most mods (dictionary, HP scaling, randomizer, the unlock mods,
 > skip-tutorial) work with no extra setup. Two mods that inject *new* script code -
 > **Enemy Resistance** and **Misunderstanding Rack** - need a PopCap-compatible `luac`
-> compiler on your `PATH` (or set `BWA\_LUAC`). Everything else is pure byte-editing.
+> compiler on your `PATH` (or set `BWA_LUAC`). Everything else is pure byte-editing.
 
 ## Custom dictionaries
 
 The **Custom / Expanded Dictionary** mod takes any plain-text word list - one word per
-line. Leave its **Word list file** box blank for the bundled \~300k list, or paste the
+line. Leave its **Word list file** box blank for the bundled ~300k list, or paste the
 full path to your own file. Words are uppercased, filtered to A–Z, de-duplicated,
 sorted, and length-gated to **3–16 letters** (the engine's limit), so whatever you feed
 it loads cleanly. There's a tiny sample at [`examples/custom-words.txt`](examples/custom-words.txt).
@@ -97,8 +97,8 @@ Everything the GUI does is on the CLI too (run from the repo root):
 ```
 python -m modkit.client init  --game "C:PathToBookworm Adventures Deluxe"
 python -m modkit.client mods
-python -m modkit.client build randomizer dictionary\_swap --set randomizer.level=7 --set randomizer.seed=42
-python -m modkit.client build dictionary\_swap --set dictionary\_swap.wordlist=/path/to/mywords.txt
+python -m modkit.client build randomizer dictionary_swap --set randomizer.level=7 --set randomizer.seed=42
+python -m modkit.client build dictionary_swap --set dictionary_swap.wordlist=/path/to/mywords.txt
 python -m modkit.client launch
 python -m modkit.client restore
 ```
@@ -117,7 +117,7 @@ Actions compiles the Windows/macOS/Linux binaries and attaches them to that Rele
 * Mods are folders under `mods/<id>/` with a `mod.json`; the core library
 (unpack / repack / bytecode / builders) is the vendored `bwakit/` package.
 
-## Legal \& credits
+## Legal & credits
 
 Unofficial, non-commercial fan tool. It contains **no game content** and operates only on
 files you already own. *Bookworm Adventures* and *Bookworm Adventures Volume 2* are
