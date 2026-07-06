@@ -107,7 +107,7 @@ const PREVIEW_MODS = [
                {key:"level",type:"int",label:"Shuffle amount (0-10)",default:3,help:"0=none, 1=within chapter, 2-5=within book (2 stays near, 5=fully random within book), 6-10=across books (10=fully random). Higher=more random; lower keeps local difficulty."},
                {key:"enemies",type:"bool",label:"Randomize enemy order",default:true},
                {key:"treasures",type:"bool",label:"Randomize treasure awards",default:false},
-               {key:"keep_bosses",type:"bool",label:"Keep bosses in their slots",default:true,help:"Off = also shuffle bosses (riskier)."},
+               {key:"keep_bosses",type:"bool",label:"Keep bosses in their slots",default:false,help:"Off = also shuffle bosses (riskier)."},
                {key:"include_tutorial",type:"bool",label:"Include chapter 1.1 (tutorial)",default:false,help:"Use with enable_gems/potions/scramble + skip_intro_tutorial."},
                {key:"balance_hp",type:"int",label:"Balance moved-enemy HP (0-3)",default:0,help:"0=off,1=gentle,2=match,3=harsh. Rescales a moved enemy\u2019s HP toward its new slot\u2019s difficulty."},
                {key:"balance_xp",type:"int",label:"Balance moved-enemy XP (0-3)",default:0,help:"0=off,1=gentle,2=match,3=harsh. Sets a moved enemy\u2019s XP toward what the slot normally gives, +small buff for tougher / nerf for easier."}]},
