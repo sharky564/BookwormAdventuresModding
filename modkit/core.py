@@ -12,8 +12,11 @@ import json
 import shutil
 import contextlib
 import subprocess
+import tempfile
+import hashlib
 
 from . import build as MB
+from . import debuglog
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)  # bwa-mod-client/ (dev tree)
@@ -136,6 +139,106 @@ def save_state(st):
     json.dump({"modded_dir": st["modded_dir"]}, open(USER_CFG, "w"))
 
 
+@contextlib.contextmanager
+def _install_lock(key_path, what="build"):
+    """Exclusive, cross-process lock so two Mod Builder processes can't work on the same
+    install at once -- the footgun where two windows both extract/repack into one folder
+    and deadlock over the files. It's an OS advisory lock in the temp dir, keyed by the
+    install path. It lives OUTSIDE the modded folder on purpose: init wipes that folder,
+    and Windows refuses to delete a file whose lock is held. The OS drops the lock
+    automatically if a process crashes, so it can never get stuck stale. Holder PID is
+    written for the message."""
+    digest = hashlib.sha256(os.path.abspath(key_path).encode()).hexdigest()[:16]
+    key = os.path.join(tempfile.gettempdir(), f"bwamod-{digest}.lock")
+    f = open(key, "a+")
+    try:
+        f.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                msvcrt.locking(f.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            f.seek(0)
+            holder = f.read().strip() or "another process"
+            raise RuntimeError(
+                f"This install is already being worked on by {holder} (a {what} is in "
+                "progress). Close the extra Mod Builder window and try again."
+            )
+        f.seek(0)
+        f.truncate()
+        f.write(f"PID {os.getpid()}")
+        f.flush()
+        yield
+    finally:
+        try:
+            if os.name == "nt":
+                f.seek(0)
+                import msvcrt
+
+                try:
+                    msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
+                except OSError:
+                    pass
+            f.close()
+        except Exception:  # noqa: BLE001 - releasing the lock must never raise
+            pass
+
+
+def _is_protected(path):
+    """True if `path` sits inside a Windows system / Program Files tree (writing there
+    needs admin rights, or gets silently redirected to VirtualStore)."""
+    p = os.path.abspath(path).lower()
+    roots = []
+    for var in (
+        "ProgramFiles",
+        "ProgramFiles(x86)",
+        "ProgramW6432",
+        "SystemRoot",
+        "windir",
+    ):
+        v = os.environ.get(var)
+        if v:
+            roots.append(os.path.abspath(v).lower())
+    roots += [r"c:\program files", r"c:\program files (x86)", r"c:\windows"]
+    return any(p == r or p.startswith(r + os.sep) for r in roots)
+
+
+def _writable_dir(path):
+    """Can we create a file under `path`? Walks up to the nearest folder that already
+    exists, since `path` itself may not have been created yet."""
+    probe = os.path.abspath(path)
+    while probe and not os.path.isdir(probe):
+        parent = os.path.dirname(probe)
+        if parent == probe:
+            return False
+        probe = parent
+    test = os.path.join(probe, ".bwamod_write_test_%d" % os.getpid())
+    try:
+        with open(test, "w"):
+            pass
+        os.remove(test)
+        return True
+    except OSError:
+        return False
+
+
+def _clean_path(s):
+    """Tidy a user-pasted path: trim whitespace, strip surrounding quotes (Windows
+    Explorer's / PowerShell's 'Copy as path' wraps it in double quotes), and expand ~
+    and environment variables (%USERPROFILE%, $HOME, ...)."""
+    if not s:
+        return s
+    s = str(s).strip()
+    while len(s) >= 2 and s[0] == s[-1] and s[0] in ("'", '"'):
+        s = s[1:-1].strip()
+    return os.path.expandvars(os.path.expanduser(s))
+
+
 def init_install(
     game,
     modded=None,
@@ -155,39 +258,56 @@ def init_install(
     .exe copies from the (disposable) duplicate so the folder has exactly one. Pass `exe`
     to pin a specific one, or keep_extra_exes=True to leave them all."""
     log = log or (lambda m: None)
-    game = os.path.abspath(game)
+    game = os.path.abspath(_clean_path(game))
     if not os.path.exists(os.path.join(game, "main.pak")):
         raise RuntimeError("No main.pak in %s -- point at the game folder." % game)
     base = os.path.basename(game.rstrip("/\\"))
-    modded = (
-        os.path.abspath(modded)
-        if modded
-        else os.path.join(os.path.dirname(game.rstrip("/\\")), base + " Modded")
-    )
-
-    if os.path.exists(modded):
-        if not force:
-            raise RuntimeError(
-                "%s already exists (enable overwrite to recreate)." % modded
+    if modded:
+        modded = os.path.abspath(_clean_path(modded))
+    else:
+        modded = os.path.join(os.path.dirname(game.rstrip("/\\")), base + " Modded")
+        # A game under Program Files (x86) would put the modded copy there too, where
+        # writing needs admin rights (or gets silently redirected to VirtualStore). Fall
+        # back to the user's home folder, which is always writable. state.json still gets
+        # found afterwards because its location is recorded in USER_CFG (~/.bwa-mod.json).
+        if _is_protected(modded) or not _writable_dir(os.path.dirname(modded)):
+            modded = os.path.join(os.path.expanduser("~"), base + " Modded")
+            log(
+                "Game is in a protected location; putting the modded copy in your "
+                "home folder instead: %s" % modded
             )
-        shutil.rmtree(modded)
-    log("Duplicating install -> %s" % modded)
-    shutil.copytree(game, modded)
+    if not _writable_dir(os.path.dirname(modded) or "."):
+        raise RuntimeError(
+            "Can't write the modded copy to %s (no permission). Choose a different "
+            "location with --modded (e.g. your Desktop or Documents)." % modded
+        )
 
-    data = os.path.join(modded, BWAMOD)
-    os.makedirs(data, exist_ok=True)
-    template = os.path.join(data, "template.pak")
-    shutil.copy2(os.path.join(modded, "main.pak"), template)
-    digest = MB.sha256(template)
+    with _install_lock(modded, "setup"):
+        if os.path.exists(modded):
+            if not force:
+                raise RuntimeError(
+                    "%s already exists (enable overwrite to recreate)." % modded
+                )
+            shutil.rmtree(modded)
+        log("Duplicating install -> %s" % modded)
+        shutil.copytree(game, modded)
 
-    originals = (
-        os.path.abspath(originals) if originals else os.path.join(data, "originals")
-    )
-    if not os.path.exists(os.path.join(originals, "data", "compressed.txt")):
-        log("Unpacking template (one-time, this can take a minute)...")
-        from bwakit import popcap_pak as P
+        data = os.path.join(modded, BWAMOD)
+        os.makedirs(data, exist_ok=True)
+        template = os.path.join(data, "template.pak")
+        shutil.copy2(os.path.join(modded, "main.pak"), template)
+        digest = MB.sha256(template)
 
-        P.extract(template, originals)
+        originals = (
+            os.path.abspath(_clean_path(originals))
+            if originals
+            else os.path.join(data, "originals")
+        )
+        if not os.path.exists(os.path.join(originals, "data", "compressed.txt")):
+            log("Unpacking template (one-time, this can take a minute)...")
+            from bwakit import popcap_pak as P
+
+            P.extract(template, originals)
 
     exes = _list_exes(modded)
     games = [f for f in exes if _is_game_exe(f)]
@@ -290,7 +410,7 @@ def build(ids, overrides=None, log=None):
     log("Verifying template and composing: %s" % ", ".join(ids))
     sink = io.StringIO()  # swallow builders' chatty stdout
     try:
-        with contextlib.redirect_stdout(sink):
+        with _install_lock(st["modded_dir"], "build"), contextlib.redirect_stdout(sink):
             r = MB.build(
                 st["template"],
                 st["originals"],
@@ -303,12 +423,16 @@ def build(ids, overrides=None, log=None):
                 game=game,
             )
     except Exception as e:
+        debuglog.record(f"build failed: {','.join(ids)} | set={overrides}")
         tail = "\n".join(sink.getvalue().splitlines()[-4:])
         raise RuntimeError(str(e) + (("\n" + tail) if tail.strip() else ""))
     st["installed"] = r["mods"]
     save_state(st)
     log("Built %s" % out)
     log("Files changed: %d   order: %s" % (len(r["files"]), " -> ".join(r["mods"])))
+    debuglog.note(
+        f"build ok: {','.join(ids)} | set={overrides} -> {out} ({len(r['files'])} files)"
+    )
     return {"out": out, "order": r["mods"], "files": len(r["files"])}
 
 

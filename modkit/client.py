@@ -22,6 +22,7 @@ for cand in (
     if cand not in sys.path and os.path.isdir(cand):
         sys.path.insert(0, cand)
 from modkit import core  # noqa: E402
+from modkit import debuglog  # noqa: E402
 
 
 def cmd_init(a):
@@ -30,7 +31,8 @@ def cmd_init(a):
             a.game, a.modded, a.originals, a.no_rename, a.force, log=print
         )
     except Exception as e:
-        sys.exit(str(e))
+        debuglog.record("init failed")
+        sys.exit("%s\n(full traceback: %s)" % (e, debuglog.PATH))
     print("Ready. exe '%s'." % st.get("exe"))
     print("Next:  bwa-mod mods   then   bwa-mod build <id> ...")
 
@@ -47,6 +49,25 @@ def cmd_mods(a):
         print("    [%s]" % " | ".join(meta))
         if m.get("compat_note"):
             print("    note: %s" % m["compat_note"])
+        spec = m.get("param_spec") or []
+        defaults = m.get("params") or {}
+        if spec:
+            print("    options:")
+            for pspec in spec:
+                key = pspec["key"]
+                dflt = pspec.get("default", defaults.get(key, ""))
+                print(
+                    "      --set %s.%s=<%s>   (default: %s)   %s"
+                    % (
+                        m["id"],
+                        key,
+                        pspec.get("type", "text"),
+                        dflt,
+                        pspec.get("label", ""),
+                    )
+                )
+                if pspec.get("help"):
+                    print("          %s" % pspec["help"].strip())
         print()
 
 
@@ -64,7 +85,8 @@ def cmd_build(a):
     try:
         r = core.build(a.mods, overrides=_parse_set(a.set), log=print)
     except Exception as e:
-        sys.exit("Build failed: %s" % e)
+        debuglog.record("build failed")
+        sys.exit("Build failed: %s\n(full traceback: %s)" % (e, debuglog.PATH))
     print("Built %s  (%d files; %s)" % (r["out"], r["files"], " -> ".join(r["order"])))
     print("Launch with:  bwa-mod launch")
 
@@ -97,6 +119,7 @@ def cmd_restore(a):
 
 
 def main(argv=None):
+    debuglog.install("CLI: " + " ".join(argv if argv is not None else sys.argv[1:]))
     p = argparse.ArgumentParser(
         prog="bwa-mod", description="Build a modded copy of Bookworm Adventures."
     )

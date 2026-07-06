@@ -35,8 +35,11 @@ XOR = 0xF7
 MAGIC = 0xBAC04AC0
 
 
+_XTAB = bytes(b ^ XOR for b in range(256))
+
+
 def dexor(b: bytes) -> bytes:
-    return bytes(c ^ XOR for c in b)
+    return b.translate(_XTAB)
 
 
 def parse(path: str):

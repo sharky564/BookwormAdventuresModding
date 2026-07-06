@@ -5,18 +5,19 @@
   "games": [
     "ba1"
   ],
-  "description": "Reorders the enemies you fight, and optionally shuffles which treasure each boss drops, from a seed. `level` sets how far enemies travel: 1 = within each chapter, 2 = within each book, 3 = across all books. Bosses keep their slots, the Book 1 tutorial is left untouched, and the same seed always produces the same game.",
+  "description": "Reorders the enemies you fight, and optionally shuffles which treasure each boss drops, from a seed. `level` sets how far enemies travel (0-10): 0 = none, 1 = within each chapter, 2-5 = within each book (5 = fully random within it), 6-10 = across all books (10 = fully random everywhere). Cross-book shuffles (6-10) are riskier -- see the note. Bosses keep their slots, the Book 1 tutorial is left untouched, and the same seed always produces the same game.",
   "author": "you",
   "apply_order": 60,
   "requires": [],
   "conflicts": [],
+  "compat_note": "If the game crashes mid-play, it's almost always the shuffle reaching too far. Cross-book levels (6-10) can place an enemy whose art/scripts aren't loaded outside its home book, and shuffling bosses (keep_bosses off) can break a boss fight -- both show up as an engine crash, often at the first boss. If that happens, drop level to 5 or lower and keep bosses in place.",
   "builder": "bwakit.mods.randomizer",
   "params": {
     "seed": "1",
     "level": 3,
     "enemies": true,
     "treasures": false,
-    "keep_bosses": true,
+    "keep_bosses": false,
     "include_tutorial": false,
     "balance_hp": 0,
     "balance_xp": 0

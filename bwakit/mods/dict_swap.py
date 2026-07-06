@@ -21,8 +21,13 @@ _DEFAULT_WORDS = os.path.normpath(
 
 
 def resolve_wordlist(wordlist):
-    """User path if given and it exists, else the bundled default list."""
+    """User path if given and it exists, else the bundled default list. Tolerates a path
+    pasted with surrounding quotes or stray whitespace, and expands ~ and env vars."""
     w = str(wordlist).strip() if wordlist else ""
+    while len(w) >= 2 and w[0] == w[-1] and w[0] in ("'", '"'):
+        w = w[1:-1].strip()
+    if w:
+        w = os.path.expandvars(os.path.expanduser(w))
     return w if (w and os.path.exists(w)) else _DEFAULT_WORDS
 
 

@@ -23,6 +23,7 @@ for _cand in (
     if _cand not in sys.path and os.path.isdir(_cand):
         sys.path.insert(0, _cand)
 from modkit import core  # noqa: E402
+from modkit import debuglog  # noqa: E402
 
 JOBS = {}  # job id -> {state, log, result, error}
 
@@ -39,8 +40,12 @@ def _start_job(fn):
         try:
             res = fn(lambda m: JOBS[jid]["log"].append(m))
             JOBS[jid].update(state="done", result=res)
-        except Exception as e:  # noqa: BLE001 - report any failure to the UI
-            JOBS[jid].update(state="error", error=str(e))
+        except BaseException as e:  # noqa: BLE001 - report ANY failure (incl. SystemExit) to the UI
+            debuglog.record(f"web job {jid} failed")
+            JOBS[jid].update(
+                state="error",
+                error=f"{e}\n(full traceback saved to {debuglog.PATH} -- send that file if you need help)",
+            )
 
     threading.Thread(target=run, daemon=True).start()
     return jid
@@ -164,13 +169,28 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def serve(host="127.0.0.1", port=8765, open_browser=True):
+    debuglog.install("web UI")
+    url = "http://%s:%d/" % (host, port)
     try:
         srv = ThreadingHTTPServer((host, port), Handler)
-    except OSError:  # port busy -> let the OS pick one
-        srv = ThreadingHTTPServer((host, 0), Handler)
-    port = srv.server_address[1]
-    url = "http://%s:%d/" % (host, port)
+    except OSError:
+        # Port busy: almost certainly another Mod Builder is already running here. Point the
+        # browser at it and exit, instead of quietly starting a second copy on a random port --
+        # two windows fighting over one install is the footgun we're avoiding. For a deliberate
+        # second instance (e.g. a different game copy), pass --port.
+        print(
+            "Mod Builder already appears to be running at %s -- opening that.\n"
+            "(If something else is using port %d, close it or pass --port.)"
+            % (url, port)
+        )
+        if open_browser:
+            try:
+                webbrowser.open(url)
+            except Exception:
+                pass
+        return
     print("bwa-mod web UI -> %s   (Ctrl-C to stop)" % url)
+    print("debug log: %s" % debuglog.PATH)
     if open_browser:
         try:
             webbrowser.open(url)
