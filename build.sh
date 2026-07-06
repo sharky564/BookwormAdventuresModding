@@ -11,6 +11,7 @@ if [ -f luac ]; then luac_arg=(--add-binary "luac:."); fi
 pyinstaller --onefile --name BookwormModBuilder \
   --add-data "mods:mods" \
   --add-data "modkit/static:modkit/static" \
+  --add-data "bwakit/game/data:bwakit/game/data" \
   --collect-data bwakit \
   --collect-submodules bwakit \
   "${luac_arg[@]}" \

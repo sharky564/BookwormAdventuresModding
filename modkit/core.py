@@ -443,7 +443,15 @@ def launch():
         raise RuntimeError("No executable recorded for this install.")
     path = os.path.join(st["modded_dir"], exe)
     if sys.platform.startswith("win"):
-        os.startfile(path)  # noqa
+        # Run from the game folder: BASS-based games load bass.dll (and other resources)
+        # relative to the current directory, so launching with the builder's cwd fails with
+        # "Can't find bass.dll" even though it sits next to the exe. os.startfile can't set
+        # cwd on older Pythons, so use Popen; fall back to os.startfile if that's refused
+        # (e.g. an exe that demands elevation).
+        try:
+            subprocess.Popen([path], cwd=st["modded_dir"])
+        except OSError:
+            os.startfile(path)  # noqa
         return {"path": path, "launched": True}
     if shutil.which("wine"):
         subprocess.Popen(["wine", path], cwd=st["modded_dir"])

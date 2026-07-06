@@ -28,7 +28,15 @@ def resolve_wordlist(wordlist):
         w = w[1:-1].strip()
     if w:
         w = os.path.expandvars(os.path.expanduser(w))
-    return w if (w and os.path.exists(w)) else _DEFAULT_WORDS
+    if w and os.path.exists(w):
+        return w
+    if not os.path.exists(_DEFAULT_WORDS):
+        raise FileNotFoundError(
+            "The bundled default word list is missing from this build (%s). This build "
+            "didn't include bwakit's data files -- rebuild the exe, or supply your own "
+            "word list path in the wordlist option." % _DEFAULT_WORDS
+        )
+    return _DEFAULT_WORDS
 
 
 def build(src, base_pak, out_pak, *, wordlist=None, gate=True, keep_stage=False, **_):

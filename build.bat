@@ -11,6 +11,7 @@ if exist luac.exe set LUAC=--add-binary "luac.exe;."
 pyinstaller --onefile --windowed --name BookwormModBuilder ^
   --add-data "mods;mods" ^
   --add-data "modkit\static;modkit\static" ^
+  --add-data "bwakit\game\data;bwakit\game\data" ^
   --collect-data bwakit ^
   --collect-submodules bwakit ^
   %LUAC% ^
